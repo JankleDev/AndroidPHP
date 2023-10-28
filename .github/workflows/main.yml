@@ -21,7 +21,7 @@ jobs:
         run: mkdir -p aarch64-linux-musl
       - name: Fetch aarch64-linux-musl from github
         working-directory: aarch64-linux-musl
-        run: curl -o aarch64-linux-musl.tar.xz "https://github.com/DaisukeDaisuke/musl-cross-make/releases/latest/download/aarch64-linux-musl.tar.xz"
+        run: wget -q -O "aarch64-linux-musl.tar.xz" "https://github.com/DaisukeDaisuke/musl-cross-make/releases/latest/download/aarch64-linux-musl.tar.xz"
       - name: Unzip aarch64-linux-musl
         working-directory: aarch64-linux-musl
         run: tar Jxfv aarch64-linux-musl.tar.xz
