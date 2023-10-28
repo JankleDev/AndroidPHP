@@ -1,0 +1,70 @@
+name: Build PHP Binaries
+
+on: 
+ push:
+ pull_request:
+ workflow_dispatch:
+
+jobs: 
+  android:
+    name: Android (PM 5)
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+         reposity: NetherGamesMC/php-build-scripts
+         path: php-build-scripts
+         ref: stable
+      - name: Init directories
+        run: mkdir -p aarch64-linux-musl
+      - name: Fetch aarch64-linux-musl from github
+        working-directory: aarch64-linux-musl
+        run: curl -o aarch64-linux-musl.tar.xz "https://github.com/DaisukeDaisuke/musl-cross-make/releases/latest/download/aarch64-linux-musl.tar.xz"
+      - name: Unzip aarch64-linux-musl
+        working-directory: aarch64-linux-musl
+        run: tar Jxfv aarch64-linux-musl.tar.xz
+      - name: Patch compile.sh
+        working-directory: php-build-scripts
+        run: sed -i=".backup" 's/LIBZIP_VERSION=".*"/LIBZIP_VERSION="1.9.2"/' ./compile.sh
+
+      - name: Install tools and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install make autoconf automake libtool libtool-bin m4 curl libc-bin gzip bzip2 bison g++ git re2c ca-certificates
+      - name: Making aarch64 php
+        working-directory: php-build-scripts
+        run: ./compile.sh -t android-aarch64 -x -j4 -PM5 -g
+      - name: Copy php
+        run: cp ./php-build-scripts/bin/php7/bin/php "php"
+        
+      - uses: actions/upload-artifact@v1
+        with:
+          name: "php"
+          path: "./php"
+          
+      - name: Copy php.ini
+        run: cp ./php-build-scripts/bin/php7/bin/php.ini ./php.ini
+        
+      - uses: actions/upload-artifact@v1
+        with:
+          name: php.ini
+          path: "./php.ini"
+
+      - name: Download a Build Artifact(php)
+        uses: actions/download-artifact@v2
+        with:
+          name: php
+      - name: Download a Build Artifact(php.ini)
+        uses: actions/download-artifact@v2
+        with:
+          name: php.ini
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: PHP Lastest
+          name: Release the lastest PHP
+          files: |
+            php
+            php.ini
