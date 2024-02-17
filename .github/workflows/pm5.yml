@@ -4,7 +4,7 @@ on:
       tagname:
         description: 'tagname'
         required: true
-        default: '8.0.20'
+        default: '8.2'
       commithash:
         description: 'commit hash'
         required: true
@@ -68,7 +68,7 @@ jobs:
         with:
          repository: NetherGamesMC/php-build-scripts
          path: php-build-scripts
-         ref: stable
+         ref: 'php/8.2'
          
       - name: Checkout php-build-scripts commit
         if: ${{ github.event.inputs.commithash != 'none' }}
